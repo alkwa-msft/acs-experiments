@@ -27,6 +27,15 @@ const CallCompositeComponent = ({ userId, token, groupId }: CallCompositeCompone
           }
         };
         createAdapter();
+
+        return () => {
+          (async () => {
+            if(adapter !== null) {
+              adapter.dispose();
+  
+            }
+          })();
+        }
       }, [adapter, groupId, token, userId]); // Empty dependencies array
 
   if (!adapter) {

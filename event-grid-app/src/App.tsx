@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import CallCompositeComponent from './CallCompositeComponent';
 import { initializeIcons } from "@fluentui/react";
 import './App.css';
-import { createUserAndToken, createUserAndTokenLocal, UserAndToken } from './utils/server';
+import { createUserAndToken, UserAndToken } from './utils/server';
 
 initializeIcons();
 
@@ -10,6 +10,7 @@ function App() {
   const [userAndToken, setUserAndToken] = useState<UserAndToken | null>(null);
 
   useEffect(() => {
+    let isMounted = true; // Track if the component is mounted
     (async () => {
       let response;
 
@@ -17,22 +18,20 @@ function App() {
         return;
       }
 
-      if (process.env.REACT_APP_NODE_ENV === 'development') {
-        response = await createUserAndTokenLocal();
+      response = await createUserAndToken();
+      if (isMounted) {
+        setUserAndToken(response);
       }
-      else {
-        response = await createUserAndToken();
-      }
-      setUserAndToken(response);
     })();
-    
-  }, [])
+    return () => {
+      isMounted = false;
+    }
+  }, [userAndToken])
 
   if (userAndToken === null) {
     return <div>Loading...</div>;
   }
 
-  console.log(JSON.stringify(userAndToken));
   const userId = userAndToken.userId;
   const token = userAndToken.token;
   const groupId = '376dbb90-b5ae-11ef-8b71-cde5a398544c';

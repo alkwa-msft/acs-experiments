@@ -1,0 +1,13 @@
+1. Mint a token on the server ✅
+2. Offer the token through a POST route ✅
+3. Take in the token and use it on the client side ✅
+
+4. Set up a signalr connection between the server and the client
+5. Send a silly message through the signalr 
+6. Recieving calling events on the server and log them
+7. Send the calling event through signalr and respond to it on the client
+
+*** Bonus
+3. Offer the token through a POST route with an identifier passed in to get a new token
+4. On the client, can we write the token to local storage
+5. We may need a UI to show 
