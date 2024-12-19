@@ -22,9 +22,11 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static(path.join(__dirname, '../build')));
 const server = createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+   cors: { origin: '*', methods: ['GET', 'POST'] },
+   
+});
 
-console.log('about to set up my socket server');
 io.on('connection', (socket) => {
   console.log('[ws] A user connected');
   socket.on('message', (message) => {
@@ -40,7 +42,6 @@ console.log('[ws] I have registered all of my events for my wssocket server');
 
 setInterval(()=>{
   if(io.engine.clientsCount > 0){
-    console.log('[ws] sending something now ', io.engine.clientsCount)
     io.emit('message', 'Hello from the server');
     io.send('[ws] Hello from the server', io.engine.clientsCount);
   }
