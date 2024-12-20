@@ -2,10 +2,18 @@
 2. Offer the token through a POST route ✅
 3. Take in the token and use it on the client side ✅
 
-4. Set up a signalr connection between the server and the client
-5. Send a silly message through the signalr 
-6. Recieving calling events on the server and log them
-7. Send the calling event through signalr and respond to it on the client
+4. Set up a signalr connection between the server and the client ✅
+5. Send a silly message through the signalr  ✅
+6. Recieving calling events on the server and log them ✅
+7. Send the calling event through signalr and respond to it on the client (using codespace)  ✅
+8. Render the "events" from the server through the socketio connection to the client
+
+9. Create an ARM template (input name of app service, and lets see if we can get a random funny name in there)
+- 1. Create an ACS resource
+- 2. Create a build to deploy to the app service
+- 3. Create an app service and deploy the bits
+- 4. Set up event grid topic with the ACS resource
+- 5. Set up the callback url based on the passed in name for the app service
 
 *** Bonus
 3. Offer the token through a POST route with an identifier passed in to get a new token
