@@ -8,14 +8,22 @@ import { Server } from 'socket.io';
 const settings = require('../appsettings.json');
 
 const connectionString = process.env.ACS_CONNECTION_STRING || settings.resourceConnectionString;
+const groupId = process.env.GROUP_ID || settings.groupId;
 
 if (connectionString === undefined) {
   console.error('Please set up an ACS Connection String in /appSettings.json');
 }
 
+if (groupId === undefined) {
+  console.error('Please set up a groupId in /appSettings.json');
+}
+
 let identityClient = new CommunicationIdentityClient(connectionString);
 
 const app = express();
+
+// make sure to include https as well
+const addr = `https://${process.env.CODESPACE_NAME}` || 'localhost'
 const port = process.env.PORT || 3001;
 // Use express.json() middleware to parse JSON request bodies
 app.use(express.json());
@@ -37,15 +45,20 @@ io.on('connection', (socket) => {
     console.log('[ws] A user disconnected');
   });
 });
-console.log('[ws] I have registered all of my events for my wssocket server');
 
+app.get('/eventgridsetup', async(req, res) => {
+  res.json({
+    url: `${process.env.CODESPACE_NAME}-${port}.app.github.dev/`,
+    addr: process.env.CODESPACE_NAME,
+    port
+  })
+})
 
-setInterval(()=>{
-  if(io.engine.clientsCount > 0){
-    io.emit('message', 'Hello from the server');
-    io.send('[ws] Hello from the server', io.engine.clientsCount);
-  }
-}, 5000);
+app.get('/groupId', async(req, res) => {
+  res.json({
+    groupId 
+  })
+})
 
 app.post('/token', async (req, res) => {
   try {
@@ -63,14 +76,16 @@ app.post('/token', async (req, res) => {
 app.post('/eventgrid', async (req, res) => {
   try {
     const events = req.body;
-    console.log('Received events:', events);
-
     // Handle subscription validation
     if (events[0].eventType === 'Microsoft.EventGrid.SubscriptionValidationEvent') {
       const validationCode = events[0].data.validationCode;
       res.status(200).json({ validationResponse: validationCode });
     } else {
-      // Process other events
+      // filtering for events only for our group id
+      if (groupId === events[0].data.group.id) {
+        console.log('[ws] server: ', events[0].eventType, 'eventTime ', events[0].eventTime)
+        io.emit('message', `${events[0].eventType} eventTime:${events[0].eventTime} `);
+      }
       res.status(200).send('Events processed');
     }
   } catch (error) {

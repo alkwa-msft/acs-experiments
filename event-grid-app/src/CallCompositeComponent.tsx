@@ -9,38 +9,37 @@ interface CallCompositeComponentProps {
 }
 
 const CallCompositeComponent = ({ userId, token, groupId }: CallCompositeComponentProps) => {
-    const [adapter, setAdapter] = React.useState<CallAdapter | null>(null);
+  const [adapter, setAdapter] = React.useState<CallAdapter | null>(null);
 
-    useEffect(() => {
-        const createAdapter = async () => {
-          if (adapter) {
-            return; 
-          }
-          else {
-            const callAdapter = await createAzureCommunicationCallAdapter({
-                userId: { communicationUserId: userId },
-                credential: new AzureCommunicationTokenCredential(token),
-                locator: { groupId },
-                displayName: 'User'
-              });
-              setAdapter(callAdapter);
-          }
-        };
-        createAdapter();
+  useEffect(() => {
+    const createAdapter = async () => {
+      if (adapter) {
+        return;
+      }
+      else {
+        const callAdapter = await createAzureCommunicationCallAdapter({
+          userId: { communicationUserId: userId },
+          credential: new AzureCommunicationTokenCredential(token),
+          locator: { groupId },
+          displayName: 'User'
+        });
+        setAdapter(callAdapter);
+      }
+    };
+    createAdapter();
 
-        return () => {
-          (async () => {
-            if(adapter !== null) {
-              adapter.dispose();
-  
-            }
-          })();
+    return () => {
+      (async () => {
+        if (adapter !== null) {
+          adapter.dispose();
         }
-      }, [adapter, groupId, token, userId]); // Empty dependencies array
+      })();
+    }
+  }, [adapter, groupId, token, userId]); // Empty dependencies array
 
   if (!adapter) {
     return <div>Loading...</div>;
-    } else {
+  } else {
     return (
       <CallComposite adapter={adapter} />
     );

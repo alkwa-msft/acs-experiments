@@ -1,3 +1,4 @@
 {
-    "resourceConnectionString": ""
+    "resourceConnectionString": "RESOURCE_CONNECTION_STRING" 
+    "groupId": "GROUP_ID"
 }
