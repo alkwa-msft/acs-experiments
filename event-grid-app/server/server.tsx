@@ -60,6 +60,25 @@ app.post('/token', async (req, res) => {
   }
 });
 
+app.post('/eventgrid', async (req, res) => {
+  try {
+    const events = req.body;
+    console.log('Received events:', events);
+
+    // Handle subscription validation
+    if (events[0].eventType === 'Microsoft.EventGrid.SubscriptionValidationEvent') {
+      const validationCode = events[0].data.validationCode;
+      res.status(200).json({ validationResponse: validationCode });
+    } else {
+      // Process other events
+      res.status(200).send('Events processed');
+    }
+  } catch (error) {
+    console.error('Error processing events:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../build', 'index.html'));
 });
