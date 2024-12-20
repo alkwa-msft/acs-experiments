@@ -22,9 +22,9 @@ let identityClient = new CommunicationIdentityClient(connectionString);
 
 const app = express();
 
-// make sure to include https as well
-const addr = `https://${process.env.CODESPACE_NAME}` || 'localhost'
 const port = process.env.PORT || 3001;
+const socketIOConnectionUrl = process.env.CODESPACE_NAME ? `https://${process.env.CODESPACE_NAME}-${port}` : `http://localhost:${port}`;
+
 // Use express.json() middleware to parse JSON request bodies
 app.use(express.json());
 app.use(cors());
@@ -48,9 +48,7 @@ io.on('connection', (socket) => {
 
 app.get('/eventgridsetup', async(req, res) => {
   res.json({
-    url: `${process.env.CODESPACE_NAME}-${port}.app.github.dev/`,
-    addr: process.env.CODESPACE_NAME,
-    port
+    url: socketIOConnectionUrl
   })
 })
 
