@@ -1,0 +1,110 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "variables": {
+      "colors": ["Red", "Green", "Blue", "Yellow", "Purple"],
+      "animals": ["Cat", "Dog", "Elephant", "Lion", "Tiger"],
+      "randomColor": "[variables('colors')[mod(uniqueString(resourceGroup().id), length(variables('colors')))]]",
+      "randomAnimal": "[variables('animals')[mod(uniqueString(resourceGroup().id), length(variables('animals')))]]",
+      "randomNumber": "[mod(int(uniqueString(resourceGroup().id)), 100)]"
+    },
+    "parameters": {
+      "appName": {
+        "type": "string",
+        "defaultValue": "[concat(variables('randomColor'), '-', variables('randomAnimal'), '-', variables('randomNumber'))]",
+        "metadata": {
+          "description": "The name of the web app."
+        }
+      },
+      "appServicePlanName": {
+        "type": "string",
+        "defaultValue": "[concat(variables('randomColor'), '-', variables('randomAnimal'), '-plan')]",
+        "metadata": {
+          "description": "The name of the App Service plan."
+        }
+      },
+      "acsName": {
+        "type": "string",
+        "defaultValue": "[concat(variables('randomColor'), '-', variables('randomAnimal'), '-acs')]",
+        "metadata": {
+          "description": "The name of the Azure Communication Service."
+        }
+      },
+      "eventGridTopicName": {
+        "type": "string",
+        "defaultValue": "[concat(variables('randomColor'), '-', variables('randomAnimal'), '-topic')]",
+        "metadata": {
+          "description": "The name of the Event Grid topic."
+        }
+      }
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Web/sites",
+        "apiVersion": "2021-02-01",
+        "name": "[parameters('appName')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
+          "siteConfig": {
+            "appSettings": [
+              {
+                "name": "resourceConnectionString",
+                "value": "[listKeys(resourceId('Microsoft.Communication/communicationServices', parameters('acsName')), '2020-08-20').primaryConnectionString]"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "type": "Microsoft.Web/serverfarms",
+        "apiVersion": "2021-02-01",
+        "name": "[parameters('appServicePlanName')]",
+        "location": "[resourceGroup().location]",
+        "sku": {
+          "name": "F1",
+          "tier": "Free"
+        }
+      },
+      {
+        "type": "Microsoft.Communication/communicationServices",
+        "apiVersion": "2020-08-20",
+        "name": "[parameters('acsName')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "dataLocation": "UnitedStates"
+        }
+      },
+      {
+        "type": "Microsoft.EventGrid/topics",
+        "apiVersion": "2021-06-01-preview",
+        "name": "[parameters('eventGridTopicName')]",
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "inputSchema": "EventGridSchema"
+        }
+      },
+      {
+        "type": "Microsoft.EventGrid/eventSubscriptions",
+        "apiVersion": "2021-06-01-preview",
+        "name": "[concat(parameters('eventGridTopicName'), '-subscription')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.EventGrid/topics', parameters('eventGridTopicName'))]",
+          "[resourceId('Microsoft.Web/sites', parameters('appName'))]"
+        ],
+        "properties": {
+          "destination": {
+            "endpointType": "WebHook",
+            "properties": {
+              "endpointUrl": "[concat('https://', parameters('appName'), '.azurewebsites.net/api/events')]"
+            }
+          },
+          "filter": {
+            "includedEventTypes": [
+              "All"
+            ]
+          }
+        }
+      }
+    ]
+  }
