@@ -5,10 +5,21 @@ import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 
-const settings = require('../appsettings.json');
+let settings;
 
-const connectionString = process.env.ACS_CONNECTION_STRING || settings.resourceConnectionString;
-const groupId = process.env.GROUP_ID || settings.groupId;
+// If the bits are deployed then use a fake config object
+if(process.env.IS_DEPLOYED) {
+  settings = {
+    resourceConnectionString: process.env.ACS_CONNECTION_STRING,
+    groupId: process.env.GROUP_ID
+  }
+} else {
+  // If the bits are local and you are doing an npm run start
+  settings = require('../appsettings.json');
+}
+
+const connectionString = settings.resourceConnectionString;
+const groupId = settings.groupId;
 
 if (connectionString === undefined) {
   console.error('Please set up an ACS Connection String in /appSettings.json');
@@ -93,7 +104,12 @@ app.post('/eventgrid', async (req, res) => {
 });
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../build', 'index.html'));
+  if(process.env.IS_DEPLOYED) { // when deployed in an app service
+    res.sendFile(path.join(__dirname, '..', 'index.html'));
+  }
+  else { // when running locally or in a codespace
+    res.sendFile(path.join(__dirname, '../build', 'index.html'));
+  }
 });
 
 // important! must listen from `server`, not `app`, otherwise socket.io won't function correctly
