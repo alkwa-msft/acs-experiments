@@ -1,4 +1,4 @@
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https://raw.githubusercontent.com/alkwa-msft/acs-experiments/alkwa/develop/event-grid-client-experienceazure/azuredeploy.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https://raw.githubusercontent.com/alkwa-msft/acs-experiments/alkwa%2Fdevelop%2Fevent-grid-client-experience/azuredeploy.json)
 
 # Getting Started with Create React App
 
