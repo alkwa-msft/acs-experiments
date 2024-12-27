@@ -14,9 +14,7 @@ const rootReactElement = ReactDOM.createRoot(root);
 
 if (rootReactElement) {
   rootReactElement.render(
-    <React.StrictMode>
       <App />
-    </React.StrictMode>
   );
 } else {
   console.error('Failed to find root element');

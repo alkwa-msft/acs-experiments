@@ -9,27 +9,14 @@ function App() {
   const [userAndToken, setUserAndToken] = useState<UserAndToken | null>(null);
   const [groupCallResponse, setGroupCallResponse] = useState<string | null>(null);
 
-  useEffect(() => {
-    let isMounted = true; // Track if the component is mounted
-    (async () => {
-      let response;
-
-      if (userAndToken !== null) {
-        return;
-      }
-
-      response = await createUserAndToken();
-      if (isMounted) {
-        setUserAndToken(response);
-      }
-    })();
-    return () => {
-      isMounted = false;
-    }
-  }, [userAndToken])
-
   useEffect(()=>{
     (async() =>{
+      const response = await fetch('/token', {
+        method: 'POST',
+      });
+      const data = await response.json();
+      setUserAndToken(data);
+
       const groupCallConfig = await fetch('/groupId');
       const groupCallConfigJson = await groupCallConfig.json();
       setGroupCallResponse(groupCallConfigJson.groupId);
@@ -37,11 +24,11 @@ function App() {
   }, []);
 
   if (userAndToken === null) {
-    return <div>Loading...</div>;
+    return <div>Loading...waiting for token</div>;
   }
 
   if (groupCallResponse === null) {
-    return <div>Loading...</div>;
+    return <div>Loading..waiting for group call.</div>;
   }
 
   const userId = userAndToken.userId;
