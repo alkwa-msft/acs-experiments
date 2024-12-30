@@ -2,8 +2,12 @@ import React, { useEffect, useState } from 'react';
 import CallCompositeComponent from './CallCompositeComponent';
 import { initializeIcons } from "@fluentui/react";
 import './App.css';
-import { createUserAndToken, UserAndToken } from './utils/server';
 initializeIcons();
+
+interface UserAndToken {
+  userId: string;
+  token: string;
+}
 
 function App() {
   const [userAndToken, setUserAndToken] = useState<UserAndToken | null>(null);

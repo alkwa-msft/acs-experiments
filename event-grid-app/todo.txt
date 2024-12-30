@@ -14,7 +14,9 @@
 - 3. Create an app service and deploy the bits ✅
 - 4. Set up event grid topic with the ACS resource  ✅
 - 5. Set up the callback url based on the passed in name for the app service 🚧
-   I need to deploy a build to the service before we attempt to register
+   I need to deploy a build to the service before we attempt to register 
+   -5.a Create a build.zip in the build directory
+   -5.b Create a storage acccount or use it to upload the build
 - 6. Re-deploy steps 🚧
    - Should you have a public build to use ❌
    - Should we be forcing a build to be created from a codespace?  ✅
@@ -24,3 +26,20 @@
 3. Offer the token through a POST route with an identifier passed in to get a new token
 4. On the client, can we write the token to local storage
 5. We may need a UI to show 
+
+
+(ARM Template) - take in the same inputs
+Create the resource group
+- Create the serverfarm
+- Create the storage account
+- Create the site
+- Create the ACS resource
+- Set ACS resource to the site
+
+(Manual)
+- Upload the build to the storage account
+
+(ARM Template) - take in the same inputs (same rg as above^)
+- Run a deployment script to deploy to the app service
+- Create EventGrid topic
+- Register to eventgrid subscription
