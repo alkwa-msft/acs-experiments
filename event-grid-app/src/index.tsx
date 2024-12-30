@@ -26,6 +26,7 @@ if (rootReactElement) {
     const eventGridConfig = await fetch('/eventgridsetup');
     const eventGridConfigAsJson = await eventGridConfig.json();
     const newSocket = io(eventGridConfigAsJson['url']);
+    console.log('*** ', eventGridConfigAsJson['url'])
     newSocket.on('connect_error', (err: any) => {
       console.error('Connection error:', err.message);
       console.error('Error description:', err.description);

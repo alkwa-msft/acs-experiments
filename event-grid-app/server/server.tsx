@@ -42,41 +42,19 @@ const koaApp = new Koa();
 const router = new Router();
 
 const port = process.env.PORT || 3001;
-const socketIOConnectionUrl = process.env.CODESPACE_NAME ? `https://${process.env.CODESPACE_NAME}-${port}` : `http://localhost:${port}`;
+const socketIOConnectionUrl = process.env.CODESPACE_NAME ? `https://${process.env.CODESPACE_NAME}-${port}.app.github.dev` : `http://localhost:${port}`;
 
-// Use express.json() middleware to parse JSON request bodies
-// app.use(express.json());
-// app.use(cors());
-// app.use(express.static(path.join(__dirname, '../build')));
-
+koaApp.use(bodyParser());
 koaApp.use(router.routes());
 koaApp.use(router.allowedMethods());
-koaApp.use(bodyParser());
 koaApp.use(koaCors());
 koaApp.use(serve(path.join(__dirname, '../build')));
 
-// const server = createServer(app);
-
 const koaServer = createServer(koaApp.callback());
-
-// const io = new Server(server, {
-//   cors: { origin: '*', methods: ['GET', 'POST'] },
-// });
 
 const koaIo = new Server(koaServer, {
   cors: { origin: '*', methods: ['GET', 'POST'] },
 })
-
-// io.on('connection', (socket) => {
-//   console.log('[ws] A user connected');
-//   socket.on('message', (message) => {
-//     console.log('[ws] Received message:', message);
-//     // Broadcast the message to all connected clients
-//   });
-//   socket.on('close', () => {
-//     console.log('[ws] A user disconnected');
-//   });
-// });
 
 koaIo.on('connection', (socket) => {
   console.log('[ws] A user connected');
@@ -89,12 +67,6 @@ koaIo.on('connection', (socket) => {
   });
 });
 
-// app.get('/eventgridsetup', async(req, res) => {
-//   res.json({
-//     url: socketIOConnectionUrl
-//   })
-// })
-
 router.get('/eventgridsetup', async (ctx, next) => {
   ctx.status = 200;
   ctx.body = {
@@ -102,31 +74,12 @@ router.get('/eventgridsetup', async (ctx, next) => {
   }
 });
 
-// app.get('/groupId', async(req, res) => {
-//   res.json({
-//     groupId 
-//   })
-// })
-
 router.get('/groupId', async(ctx, next) => {
   ctx.status = 200;
   ctx.body = {
     groupId
   }
 });
-
-// app.post('/token', async (req, res) => {
-//   try {
-//     const userAndToken = await identityClient.createUserAndToken(["voip"]);
-//     res.json({
-//       userId: userAndToken.user.communicationUserId,
-//       token: userAndToken.token
-//     })
-//   } catch (error) {
-//     console.error('Error minting token:', error);
-//     res.status(501).send('Error minting token');
-//   }
-// });
 
 router.post('/token', async (ctx, next) => {
   try {
@@ -143,31 +96,9 @@ router.post('/token', async (ctx, next) => {
   }
 });
 
-// app.post('/eventgrid', async (req, res) => {
-//   try {
-//     const events = req.body;
-//     // Handle subscription validation
-//     if (events[0].eventType === 'Microsoft.EventGrid.SubscriptionValidationEvent') {
-//       const validationCode = events[0].data.validationCode;
-//       res.status(200).json({ validationResponse: validationCode });
-//     } else {
-//       // filtering for events only for our group id
-//       if (groupId === events[0].data.group.id) {
-//         console.log('[ws] server: ', events[0].eventType, 'eventTime ', events[0].eventTime)
-//         io.emit('message', `${events[0].eventType} eventTime:${events[0].eventTime} `);
-//       }
-//       res.status(200).send('Events processed');
-//     }
-//   } catch (error) {
-//     console.error('Error processing events:', error);
-//     res.status(500).send('Internal Server Error');
-//   }
-// });
-
 router.post('/eventgrid', async (ctx, next) => {
   try {
-    const events = ctx.req.body;
-    // Handle subscription validation
+    const events = ctx.request.body as any;
     if (events[0].eventType === 'Microsoft.EventGrid.SubscriptionValidationEvent') {
       const validationCode = events[0].data.validationCode;
       ctx.status = 200;
@@ -188,15 +119,6 @@ router.post('/eventgrid', async (ctx, next) => {
   }
 })
 
-// app.get('*', (req, res) => {
-//   if(process.env.IS_DEPLOYED) { // when deployed in an app service
-//     res.sendFile(path.join(__dirname, '..', 'index.html'));
-//   }
-//   else { // when running locally or in a codespace
-//     res.sendFile(path.join(__dirname, '../build', 'index.html'));
-//   }
-// });
-
 router.get('/', async (ctx, next) => {
   if(process.env.IS_DEPLOYED) { // when deployed in an app service
     send(ctx, path.join(__dirname, '..', 'index.html'));
@@ -209,5 +131,3 @@ router.get('/', async (ctx, next) => {
 koaApp.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 })
-// important! must listen from `server`, not `app`, otherwise socket.io won't function correctly
-// server.listen(port, () => console.info(`Listening on port ${port}.`));
